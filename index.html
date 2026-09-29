@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Raffa Gamadan · Vitals</title>
+    <meta name="description" content="Portfolio of Raffa Gamadan, a medical student at Universitas Sriwijaya who writes software. A particle heart built in code beats to a simulated ECG, then turns into DNA, a neuron, a circuit board and a globe as you scroll." />
+    <meta name="theme-color" content="#020403" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbf0ea" media="(prefers-color-scheme: light)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Raffa Gamadan · Vitals" />
+    <meta property="og:description" content="Medical student who writes software. A heart made of 65,536 particles, paced by a synthetic ECG." />
+    <meta property="og:url" content="https://raffagmd-vitals.netlify.app/" />
+    <meta property="og:image" content="https://raffagmd-vitals.netlify.app/og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="canonical" href="https://raffagmd-vitals.netlify.app/" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <script>
+      // Pick the theme before first paint: saved choice, else the OS setting.
+      (function () {
+        var root = document.documentElement, t = null;
+        try { t = localStorage.getItem('vitals-theme'); } catch (e) {}
+        if (t !== 'paper' && t !== 'monitor') {
+          // an embedding host may already have set light or dark
+          var host = root.getAttribute('data-theme');
+          if (host === 'light') t = 'paper';
+          else if (host === 'dark') t = 'monitor';
+          else t = window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'paper' : 'monitor';
+        }
+        root.setAttribute('data-theme', t);
+      })();
+    </script>
+  </head>
+  <body>
+    <canvas id="gl" class="gl" aria-hidden="true"></canvas>
+
+    <div class="boot" id="boot" aria-hidden="true">
+      <div class="boot-log mono" id="boot-log"></div>
+      <button class="boot-skip mono" id="boot-skip" type="button" tabindex="-1">Skip</button>
+    </div>
+
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="topbar" id="topbar">
+      <a class="brand mono" href="#vitals" aria-label="Raffa Gamadan, back to top">
+        <span class="brand-dot" id="brand-dot"></span>
+        <span class="brand-name">RAFFAGMD</span>
+        <span class="brand-sub">/ vitals</span>
+      </a>
+      <nav class="nav mono" aria-label="Sections">
+        <a href="#history" data-nav="history"><span class="code">Hx</span><span class="word">About</span></a>
+        <a href="#labs" data-nav="labs"><span class="code">Lab</span><span class="word">Skills</span></a>
+        <a href="#procedures" data-nav="procedures"><span class="code">Px</span><span class="word">Projects</span></a>
+        <a href="#discharge" data-nav="discharge"><span class="code">D/C</span><span class="word">Contact</span></a>
+      </nav>
+      <div class="status mono">
+        <span class="clock" id="clock" title="Local time in Palembang">PLG --:--:-- WIB</span>
+        <button class="icon-btn" id="sound-btn" type="button" aria-pressed="false" aria-label="Turn on the heartbeat sound" data-cursor="sound">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path class="wave" d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path class="mute" d="M16 9l5 6M21 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn theme-btn" id="theme-btn" type="button" aria-label="Switch theme" data-cursor="theme">
+          <span class="theme-label" id="theme-label">Paper</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- 01 Vitals -->
+      <section class="hero" id="vitals" data-shape="heart" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="kicker mono" data-scramble>Raffa Gamadan · Palembang, Indonesia</p>
+          <h1 class="display" id="hero-title" data-split>Medical student who writes <em>software</em>.</h1>
+          <p class="lede" data-fade>First year at the Faculty of Medicine, Universitas Sriwijaya. Outside lectures I write C++, Python and JavaScript. One of my projects is an ECG-style heart monitor running on an ESP32.</p>
+          <div class="cta" data-fade>
+            <a class="btn" href="#procedures" data-magnetic>See my work</a>
+            <a class="btn ghost" href="https://github.com/ResVet" target="_blank" rel="noopener" data-magnetic>GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+
+        <aside class="vitals-panel mono" aria-label="Simulated vital signs" data-fade>
+          <p class="panel-head"><span>Monitor</span><span>simulated</span></p>
+          <div class="vital v-hr">
+            <span class="v-label">HR</span><span class="v-unit">bpm</span>
+            <span class="v-value" id="v-hr">--</span>
+            <svg class="v-heart" id="v-heart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="currentColor"/></svg>
+          </div>
+          <div class="vital v-spo2">
+            <span class="v-label">SpO<sub>2</sub></span><span class="v-unit">%</span>
+            <span class="v-value" id="v-spo2">--</span>
+          </div>
+          <div class="vital v-nibp">
+            <span class="v-label">NIBP</span><span class="v-unit">mmHg</span>
+            <span class="v-value" id="v-nibp">--/--</span>
+          </div>
+          <div class="vital v-resp">
+            <span class="v-label">RESP</span><span class="v-unit">rpm</span>
+            <span class="v-value" id="v-resp">--</span>
+          </div>
+          <p class="alarm" id="alarm" aria-live="polite"></p>
+        </aside>
+
+        <p class="fig fig-hero" data-fade><span class="fig-n">Fig. 1</span> Heart, anterior view. <span data-count>65,536</span> points generated in code and paced by a simulated ECG. Tap the heart to throw in an early beat.</p>
+      </section>
+
+      <!-- 02 History -->
+      <section class="section history" id="history" data-shape="dna" aria-labelledby="history-title">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow mono" data-scramble>02 · Hx · About</p>
+            <h2 class="title" id="history-title" data-split>History</h2>
+          </header>
+
+          <dl class="chart">
+            <div class="chart-row" data-fade>
+              <dt class="mono">Presenting complaint</dt>
+              <dd>Builds software between lectures.</dd>
+            </div>
+            <div class="chart-row" data-fade>
+              <dt class="mono">History</dt>
+              <dd>Competed in programming and science competitions during high school at SMA Kusuma Bangsa. Won first place at the IFEST Competitive Programming Competition 2025, hosted by Universitas Multi Data Palembang, and reached the biology final of the UI Science Olympiad 2024. Started medical school at Universitas Sriwijaya in 2026.</dd>
+            </div>
+            <div class="chart-row" data-fade>
+              <dt class="mono">Social</dt>
+              <dd>Secretary of the 2026 medical cohort, Astramedika. Vice president of Leo Club Palembang Spartax, a youth service club of about 44 members, where I also coordinated the media team for the Lelives 2025 blood donation drive.</dd>
+            </div>
+            <div class="chart-row" data-fade>
+              <dt class="mono">Plan</dt>
+              <dd>Surgery is the long-term goal. Until then I plan to keep writing software alongside my studies.</dd>
+            </div>
+          </dl>
+
+          <div class="timeline-wrap" data-fade>
+            <p class="mini-head mono">Past history</p>
+            <ol class="timeline">
+              <li><span class="t-year mono">2026</span><span class="t-text">Began medicine at FK Universitas Sriwijaya, and took on the role of cohort secretary</span></li>
+              <li><span class="t-year mono">2025</span><span class="t-text">1st place, IFEST Competitive Programming Competition</span></li>
+              <li><span class="t-year mono">2025</span><span class="t-text">2nd place, SICHECO, Universitas Sriwijaya</span></li>
+              <li><span class="t-year mono">2025</span><span class="t-text">Media team coordinator, Lelives blood donation drive</span></li>
+              <li><span class="t-year mono">2024</span><span class="t-text">Finalist in biology, UI Science Olympiad</span></li>
+              <li><span class="t-year mono">2024</span><span class="t-text">Competed in OSP Informatika</span></li>
+              <li><span class="t-year mono">2024</span><span class="t-text">Vice president, Leo Club Palembang Spartax, through 2026</span></li>
+            </ol>
+          </div>
+
+          <p class="fig" data-fade><span class="fig-n">Fig. 2</span> B-DNA, 10.5 base pairs per turn. Its 20 base pairs spell my first name at two bits per base. <span class="dna-read mono" id="dna-read" aria-hidden="true"></span></p>
+        </div>
+      </section>
+
+      <!-- 03 Labs -->
+      <section class="section labs" id="labs" data-shape="neuron" aria-labelledby="labs-title">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow mono" data-scramble>03 · Lab · Skills</p>
+            <h2 class="title" id="labs-title" data-split>Labs</h2>
+            <p class="section-note" data-fade>Specimen: Raffa Gamadan. Collected in Palembang. The levels are my own assessment.</p>
+          </header>
+
+          <div class="lab-report" data-fade>
+            <table class="lab-table">
+              <caption class="mono">Panel: programming</caption>
+              <thead class="mono">
+                <tr><th scope="col">Test</th><th scope="col">Result</th><th scope="col" class="flag-col">Flag</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">C++</th><td>Fluent</td><td class="flag-col"><span class="flag">H</span></td></tr>
+                <tr><th scope="row">Python</th><td>Fluent</td><td class="flag-col"><span class="flag">H</span></td></tr>
+                <tr><th scope="row">PyTorch</th><td>Fluent</td><td class="flag-col"><span class="flag">H</span></td></tr>
+                <tr><th scope="row">Arduino and ESP32</th><td>Expert</td><td class="flag-col"><span class="flag">H</span></td></tr>
+                <tr><th scope="row">JavaScript</th><td>Working</td><td class="flag-col"></td></tr>
+                <tr><th scope="row">CSS</th><td>Working</td><td class="flag-col"></td></tr>
+                <tr><th scope="row">Linux (Arch)</th><td>Daily driver</td><td class="flag-col"></td></tr>
+              </tbody>
+            </table>
+            <p class="lab-foot mono"><span class="flag">H</span> Above the usual range for a first-year medical student.</p>
+          </div>
+
+          <div class="certs" data-fade>
+            <p class="mini-head mono">Certificates</p>
+            <p>Timedoor Academy: web development, app development and AI development.</p>
+          </div>
+
+          <p class="fig" data-fade><span class="fig-n">Fig. 3</span> Multipolar neuron with a myelinated axon. Each heartbeat sends an action potential from the soma to the terminals, and the dendrites carry signals the other way.</p>
+        </div>
+      </section>
+
+      <!-- 04 Procedures -->
+      <section class="section procedures" id="procedures" data-shape="chip" aria-labelledby="procedures-title">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow mono" data-scramble>04 · Px · Projects</p>
+            <h2 class="title" id="procedures-title" data-split>Procedures</h2>
+            <p class="section-note" data-fade>Things I've built, plus one I can't show yet.</p>
+          </header>
+
+          <div class="cases">
+            <article class="case" data-tilt data-fade>
+              <div class="case-top mono"><span>PX-01</span><span class="pill done">Done</span></div>
+              <h3>ESP32 heart monitor</h3>
+              <p>An ECG-style heart monitor built on an ESP32 microcontroller and programmed in the Arduino IDE. The trace running along the bottom of this page is a nod to it.</p>
+              <ul class="tags mono"><li>ESP32</li><li>Arduino</li><li>C++</li></ul>
+            </article>
+
+            <article class="case" data-tilt data-fade>
+              <div class="case-top mono"><span>PX-02</span><span class="pill live">Live</span></div>
+              <h3>Vitals</h3>
+              <p>This site. A GPU particle system moves 65,536 points between five shapes generated in code, and the heart beats to an ECG synthesised with the McSharry model.</p>
+              <ul class="tags mono"><li>Three.js</li><li>GLSL</li><li>GSAP</li><li>Vite</li></ul>
+              <a class="case-link mono" href="https://github.com/ResVet/vitals" target="_blank" rel="noopener" data-cursor="open">Source <span aria-hidden="true">↗</span></a>
+            </article>
+
+            <article class="case" data-tilt data-fade>
+              <div class="case-top mono"><span>PX-03</span><span class="pill wip">In progress</span></div>
+              <h3>Alphangers class portal</h3>
+              <p>A portal for Class Alpha of the 2026 FK Unsri cohort. Each channel opens the class's shared Drive folder, and it's up against the portals the other classes are building.</p>
+              <ul class="tags mono"><li>Web</li><li>Class project</li></ul>
+            </article>
+
+            <article class="case sealed" data-tilt data-fade>
+              <div class="case-top mono"><span>PX-04</span><span class="pill sealed-pill">Sealed</span></div>
+              <h3><span class="redact" aria-hidden="true">████████</span><span class="sr-only">Name withheld</span></h3>
+              <p>A healthcare web app for the Logicodix 2026 hackathon. The details stay sealed until submissions close on 14 November.</p>
+              <ul class="tags mono"><li>Hackathon</li><li>Healthcare</li></ul>
+            </article>
+          </div>
+
+          <p class="fig" data-fade><span class="fig-n">Fig. 4</span> Microcontroller board with fan-out traces and a meander PCB antenna. Data pulses run outward on every beat.</p>
+        </div>
+      </section>
+
+      <!-- 05 Discharge -->
+      <section class="section discharge" id="discharge" data-shape="globe" aria-labelledby="discharge-title">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow mono" data-scramble>05 · D/C · Contact</p>
+            <h2 class="title" id="discharge-title" data-split>Discharge</h2>
+          </header>
+
+          <dl class="chart compact">
+            <div class="chart-row" data-fade><dt class="mono">Condition</dt><dd>Stable, and still building things.</dd></div>
+            <div class="chart-row" data-fade><dt class="mono">Follow-up</dt><dd>Questions, project ideas and feedback on this site are all welcome.</dd></div>
+            <div class="chart-row" data-fade><dt class="mono">Location</dt><dd>Palembang, South Sumatra, Indonesia (UTC+7)</dd></div>
+          </dl>
+
+          <form class="form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="contact-form" data-fade>
+            <input type="hidden" name="form-name" value="contact" />
+            <p class="hp" aria-hidden="true"><label>Leave this empty <input name="bot-field" tabindex="-1" autocomplete="off" /></label></p>
+            <div class="field">
+              <label class="mono" for="f-name">Name</label>
+              <input id="f-name" name="name" type="text" autocomplete="name" required />
+            </div>
+            <div class="field">
+              <label class="mono" for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" autocomplete="email" required />
+            </div>
+            <div class="field wide">
+              <label class="mono" for="f-message">Message</label>
+              <textarea id="f-message" name="message" rows="4" required></textarea>
+            </div>
+            <div class="form-actions wide">
+              <button class="btn" type="submit" data-magnetic>Send message</button>
+              <p class="form-status mono" id="form-status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+
+          <ul class="links mono" data-fade>
+            <li><a href="https://github.com/ResVet" target="_blank" rel="noopener" data-cursor="open">GitHub <span aria-hidden="true">↗</span></a></li>
+          </ul>
+
+          <p class="fig" data-fade><span class="fig-n">Fig. 5</span> Earth, with Palembang marked at 2.99° S, 104.76° E.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="colophon mono">
+      <p>Made with Three.js, GLSL, GSAP and Vite. Every shape on this page is generated in code as it loads, so the site ships no 3D model files.</p>
+      <p><a href="https://github.com/ResVet/vitals" target="_blank" rel="noopener">Source</a> · © 2026 Raffa Gamadan</p>
+    </footer>
+
+    <div class="monitor" id="monitor" aria-hidden="true">
+      <div class="monitor-labels mono">
+        <span class="ch ch-ecg">II</span>
+        <span class="ch ch-pleth">Pleth</span>
+        <span class="ch ch-resp">Resp</span>
+      </div>
+      <canvas id="ecg" class="ecg"></canvas>
+      <div class="monitor-side mono">
+        <span class="side-speed">25 mm/s</span>
+        <span class="side-hr"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.6a4.3 4.3 0 0 1 7.5 2.7c0 5.6-7.5 10.2-7.5 10.2z" fill="currentColor"/></svg><b id="side-hr">--</b></span>
+      </div>
+    </div>
+
+    <div class="cursor" id="cursor" aria-hidden="true"><span class="cursor-ring"></span><span class="cursor-dot"></span><span class="cursor-label mono"></span></div>
+    <div class="toast mono" id="toast" role="status" aria-live="polite"></div>
+
+    <noscript><p class="noscript">This page draws its animation with JavaScript and WebGL. Everything else is readable without it.</p></noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
